@@ -1,0 +1,10 @@
+# python
+__pycache__/
+
+# text editors
+.vscode/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
