@@ -2,7 +2,7 @@ import subprocess
 from typing import List
 
 
-def get_all_commits_title() -> List[str]:
+def get_all_commits_until_origin_head() -> List[str]:
     result = (
         subprocess.check_output(
             ["git", "log", "--pretty=format:%s"], stderr=subprocess.STDOUT
@@ -17,9 +17,9 @@ def prepend_a_text_to_text(*, base_text: str, prepend_this: str) -> str:
     return f"{prepend_this}\n{base_text}"
 
 
-def prepend_commits_title(base_text: str, *, commits_amount: int) -> str:
-    commits_title = get_all_commits_title()[0:commits_amount]
-    commits_title_as_text = "\n".join(commits_title)
+def prepend_commit_titles(base_text: str) -> str:
+    commits = get_all_commits_until_origin_head()[:-1]
+    commit_titles_as_text = "\n".join(commits)
     return prepend_a_text_to_text(
-        base_text=base_text, prepend_this=commits_title_as_text
+        base_text=base_text, prepend_this=commit_titles_as_text
     )
