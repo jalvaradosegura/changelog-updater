@@ -1,7 +1,10 @@
 from unittest.mock import patch
 
+import pytest
+
 from changelog_updater.main import (
     get_all_commit_titles_until_origin_head,
+    main,
     prepend_a_text_to_a_text,
     prepend_commit_titles_to_a_text,
 )
@@ -78,3 +81,29 @@ def test_add_commit_titles_with_some_format_to_a_text():
     )
 
     assert result == expected_content
+
+
+@patch(
+    "changelog_updater.main.subprocess.check_output",
+    lambda *args, **kwargs: dummy_commit_titles,
+)
+def test_cmd_prepend_commits_to_a_file(tmp_file_path):
+    with open(tmp_file_path, "w") as f:
+        f.write("* 0.1.0\nsome text\nsome more text\n")
+
+    response = main(["--file", str(tmp_file_path)])
+    with open(tmp_file_path, "r") as f:
+        content = f.read()
+
+    assert response == 0
+    assert "test 3" in content
+
+
+def test_cmd_prepend_commits_to_a_file_and_it_doesnt_exist():
+    with pytest.raises(FileNotFoundError):
+        main(["--file", "some-file-123!.hello"])
+
+
+def test_cmd_prepend_commits_to_a_file_empty_file_parameter():
+    with pytest.raises(ValueError):
+        main([])
