@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "changelog-updater"
 version = "0.1.0"
-description = "Upload your changelog"
+description = "Update your changelog"
 authors = ["Jorge Alvarado <alvaradosegurajorge@gmail.com>"]
 
 [tool.poetry.dependencies]
@@ -14,3 +14,6 @@ pytest-cov = "^3.0.0"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+changelog-updater = "changelog_updater.main:main"
