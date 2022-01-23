@@ -1,3 +1,4 @@
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -16,15 +17,19 @@ $ git log origin/main~1..HEAD --pretty=format:%s
 test 3
 test 2
 test 1
-Move tox to dev dependencies
 """
-dummy_commit_titles = b"test 3\ntest 2\ntest 1\nMove tox to dev dependencies"
+dummy_commit_titles = b"test 3\ntest 2\ntest 1\n"
 
 
 def test_prepend_a_line_to_text():
     text = "Some random text"
     result = prepend_a_text_to_a_text(base_text=text, prepend_this="Hi,")
     assert result == f"Hi,\n{text}"
+
+
+def test_get_all_git_commits_title_no_remote_repo():
+    with pytest.raises(ValueError):
+        get_all_commit_titles_until_origin_head()
 
 
 @patch(
@@ -87,7 +92,7 @@ def test_add_commit_titles_with_some_format_to_a_text():
     "changelog_updater.main.subprocess.check_output",
     lambda *args, **kwargs: dummy_commit_titles,
 )
-def test_cmd_prepend_commits_to_a_file(tmp_file_path):
+def test_cmd_prepend_commits_to_a_file(tmp_file_path: Path):
     with open(tmp_file_path, "w") as f:
         f.write("* 0.1.0\nsome text\nsome more text\n")
 
@@ -107,3 +112,21 @@ def test_cmd_prepend_commits_to_a_file_and_it_doesnt_exist():
 def test_cmd_prepend_commits_to_a_file_empty_file_parameter():
     with pytest.raises(ValueError):
         main([])
+
+
+@patch(
+    "changelog_updater.main.subprocess.check_output",
+    lambda *args, **kwargs: dummy_commit_titles,
+)
+def test_cmd_prepend_commits_to_a_file_at_certain_line(tmp_file_path: Path):
+    with open(tmp_file_path, "w") as f:
+        f.write("CHANGELOG\n\n* line 1\n * line 2\n* line 3")
+
+    response = main(["--file", str(tmp_file_path), "--prepend-at-line", "3"])
+    with open(tmp_file_path, "r") as f:
+        content = f.read()
+
+    assert response == 0
+    assert (
+        content == "CHANGELOG\n\ntest 3\ntest 2\ntest 1\n* line 1\n * line 2\n* line 3"
+    )

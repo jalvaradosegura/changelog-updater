@@ -17,3 +17,6 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 changelog-updater = "changelog_updater.main:main"
+
+[tool.coverage.run]
+omit = ["changelog_updater/__main__.py"]
