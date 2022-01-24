@@ -130,3 +130,32 @@ def test_cmd_prepend_commits_to_a_file_at_certain_line(tmp_file_path: Path):
     assert (
         content == "CHANGELOG\n\ntest 3\ntest 2\ntest 1\n* line 1\n * line 2\n* line 3"
     )
+
+
+@patch(
+    "changelog_updater.main.subprocess.check_output",
+    lambda *args, **kwargs: dummy_commit_titles,
+)
+def test_cmd_prepend_commits_to_a_file_at_certain_line_with_certain_format(
+    tmp_file_path: Path,
+):
+    with open(tmp_file_path, "w") as f:
+        f.write("CHANGELOG\n\n* line 1\n * line 2\n* line 3")
+
+    response = main(
+        [
+            "--file",
+            str(tmp_file_path),
+            "--prepend-at-line",
+            "3",
+            "--prepend-this-to-commits",
+            "\t* ",
+        ]
+    )
+    with open(tmp_file_path, "r") as f:
+        content = f.read()
+
+    assert response == 0
+    assert content == (
+        "CHANGELOG\n\n\t* test 3\n\t* test 2\n\t* test 1\n* line 1\n * line 2\n* line 3"
+    )

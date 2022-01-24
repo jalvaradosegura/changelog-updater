@@ -40,9 +40,9 @@ def prepend_a_text_to_a_text(*, base_text: str, prepend_this: str) -> str:
 def prepend_commit_titles_to_a_text(
     base_text: str,
     *,
-    prepend_this_to_commits: str = None,
     origin_branch_name: str = "main",
     prepend_at_line: int = None,
+    prepend_this_to_commits: str = None,
 ) -> str:
     commits = get_all_commit_titles_until_origin_head(origin_branch_name)[:-1]
 
@@ -69,6 +69,7 @@ def prepend_commit_titles_to_a_file(
     file_path: Union[Path, str],
     origin_branch_name: str = "main",
     prepend_at_line: int = None,
+    prepend_this_to_commits: str = None,
 ):
     with open(file_path, "r") as f:
         file_content = f.read()
@@ -77,6 +78,7 @@ def prepend_commit_titles_to_a_file(
         file_content,
         origin_branch_name=origin_branch_name,
         prepend_at_line=prepend_at_line,
+        prepend_this_to_commits=prepend_this_to_commits,
     )
 
     with open(file_path, "w") as f:
@@ -99,13 +101,21 @@ def main(argv: Optional[List[str]] = None):
         help="Prepend commit messages at this line of the file",
         default="0",
     )
+    parser.add_argument(
+        "--prepend-this-to-commits",
+        help="Prepend this to commit messages",
+        default="",
+    )
     args = parser.parse_args(argv)
 
     if not args.file:
         raise ValueError("You must specify the --file flag")
 
     prepend_commit_titles_to_a_file(
-        args.file, args.origin_branch_name, int(args.prepend_at_line)
+        args.file,
+        args.origin_branch_name,
+        int(args.prepend_at_line),
+        args.prepend_this_to_commits,
     )
 
     return 0
